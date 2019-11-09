@@ -42,6 +42,9 @@
       </toolsSet>
       <compileType>
         <linkerTool>
+          <linkerLibItems>
+            <linkerLibFileItem>C:/Windows/SysWOW64/winmm.dll</linkerLibFileItem>
+          </linkerLibItems>
           <commandLine>resource.res</commandLine>
         </linkerTool>
       </compileType>

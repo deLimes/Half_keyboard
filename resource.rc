@@ -86,6 +86,7 @@ BEGIN
 POPUP "Menu"
 BEGIN
 MENUITEM "&Переключение", ID_MENU_Switching
+MENUITEM "&Звук", ID_MENU_Sound
 MENUITEM "&Справка", ID_MENU_Reference
 MENUITEM "&О программе ...", ID_MENU_About
 MENUITEM SEPARATOR
@@ -98,7 +99,7 @@ END
 // Диалоговое окно
 //
 
-IDD_REFERENCE DIALOGEX 0, 0, 295, 100
+IDD_REFERENCE DIALOGEX 0, 0, 295, 120
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Справка"
 FONT 8, "MS Shell Dlg"
@@ -106,9 +107,10 @@ BEGIN
 LTEXT "    Программа Half keyboard предназначена для набора текстов одной рукой.", IDC_STATIC, 10, 10, 280, 8
 LTEXT "    По нажатию клавиши пробел, половина символов клавиатуры замещается символами другой половины.", IDC_STATIC, 10, 20, 280, 16
 LTEXT "    Для временной паузы предназначена клавиша ""-"" на дополнительной клавиатуре.", IDC_STATIC, 10, 40, 280, 16
-LTEXT "    Для переключения раскладки предназначена правая клавиша ""Win"".", IDC_STATIC, 10, 60, 280, 16
-LTEXT "    Для выхода нажмите ""SPACE+ESC"".", IDC_STATIC, 10, 70, 280, 16
-DEFPUSHBUTTON   "ОК", IDOK, 113, 82, 50, 14, WS_GROUP
+LTEXT "    Для включения/отключения звука клавиш, предназначена клавиша ""*"" на дополнительной клавиатуре.", IDC_STATIC, 10, 60, 280, 16
+LTEXT "    Для переключения раскладки предназначена правая клавиша ""Win"".", IDC_STATIC, 10, 80, 280, 16
+LTEXT "    Для выхода нажмите ""SPACE+ESC"".", IDC_STATIC, 10, 90, 280, 16
+DEFPUSHBUTTON   "ОК", IDOK, 113, 102, 50, 14, WS_GROUP
 END
 
 /////////////////////////////////////////////////////////////////////////////

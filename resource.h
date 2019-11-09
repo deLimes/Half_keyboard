@@ -7,6 +7,7 @@
 #define ID_MENU_Reference         32772
 #define ID_MENU_About             32773
 #define ID_MENU_EXIT              32774
+#define ID_MENU_Sound             32775
 #define IDC_STATIC				-1
 #define IDI_WAV1                  201
 #define IDI_WAV2                  202

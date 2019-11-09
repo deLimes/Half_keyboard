@@ -12,8 +12,11 @@
 #include "resource.h"
 #include <string.h>
 
-///////
+//////
 #include <mmsystem.h>
+#include <fstream>  
+#include <ShlObj.h>
+#include <cstring>
 ///////
 
 ///////
@@ -27,54 +30,17 @@
 #include <wchar.h>
 #pragma comment(lib, "wininet.lib")
 
+using namespace std;
 
 char buffer[64000];
 DWORD readd = 0;
  
-wchar_t * utf8_to_unicode(char *utf8_string)
-{
-    int err;
-    wchar_t * res;
-    int res_len = MultiByteToWideChar(
-        CP_UTF8,            // Code page
-        0,                  // No flags
-        utf8_string,        // Multibyte characters string
-        -1,                 // The string is NULL terminated
-        NULL,               // No buffer yet, allocate it later
-        0                   // No buffer
-        );
-    if (res_len == 0)
-    {
-        printf("Failed to obtain utf8 string length\n");
-        return NULL;
-    }
-    res = (wchar_t*)calloc(res_len + 1, sizeof(wchar_t)); //пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ +1 пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
-    if (res == NULL)
-    {
-        printf("Failed to allocate unicode string\n");
-        return NULL;
-    }
-    err = MultiByteToWideChar(
-        CP_UTF8,            // Code page
-        0,                  // No flags
-        utf8_string,        // Multibyte characters string
-        -1,                 // The string is NULL terminated
-        res,                // Output buffer
-        res_len             // buffer size
-        );
-    if (err == 0)
-    {
-        printf("Failed to convert to unicode\n");
-        free(res);
-        return NULL;
-    }
-    return res;
-}
+
 ///////
 
 
 
-using namespace std;
+
 //////////////////////////////////////
 
 #define MYWM_NOTIFYICON (WM_USER + 1)
@@ -109,6 +75,8 @@ bool rRetFalse = false;
 bool mRetFalse = false;
 //
 
+string ConfigFilename;
+
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -142,12 +110,34 @@ BOOL TrayMessage(HWND hDlg, DWORD dwMessage, UINT uID, HICON hIcon, PSTR pszTip)
 	return res;
 }
 
+void SaveCfgFile()
+{
+    char buffer[MAX_PATH];
+    GetModuleFileName(NULL, buffer, MAX_PATH);
+    string::size_type pos = string(buffer).find_last_of("\\/");
+    ConfigFilename = "" + string(buffer).substr(0, pos) + "/half_kayboard.cfg";
+
+    std::ofstream outfile(ConfigFilename);
+    if (CaptureEnabled) {
+        outfile << "CaptureEnabled=1\n";
+    } else {
+        outfile << "CaptureEnabled=0\n";
+    }
+    if (SoundEnabled) {
+        outfile << "SoundEnabled=1\n";
+    } else {
+        outfile << "SoundEnabled=0\n";
+    }
+    outfile.close();
+
+}
+
 LRESULT CALLBACK keyboardHook(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	KBDLLHOOKSTRUCT *p = reinterpret_cast<KBDLLHOOKSTRUCT *>(lParam);
 	DWORD newVkCode;
 	INPUT inputs[1];
-	UINT ret;
+	UINT ret;   
 
 	char wParamStr[16];
 	char vkStr[16] = "";
@@ -535,10 +525,31 @@ LRESULT CALLBACK keyboardHook(int nCode, WPARAM wParam, LPARAM lParam)
 		//Exit
 		if (p->vkCode == 27 && (p->flags & LLKHF_INJECTED) == 0 && (wParam == WM_KEYDOWN) && ClampedGap) {
 
+                    SaveCfgFile();
+                    /*
+                        char buffer[MAX_PATH];
+                        GetModuleFileName(NULL, buffer, MAX_PATH);
+                        string::size_type pos = string(buffer).find_last_of("\\/");
+                        ConfigFilename = ""+ string(buffer).substr(0, pos) + "/half_kayboard.cfg";
+                    
+                        std::ofstream outfile (ConfigFilename);
+                        if(CaptureEnabled){
+                            outfile << "CaptureEnabled=1\n";
+                        }else{
+                            outfile << "CaptureEnabled=0\n";
+                        }
+                        if(SoundEnabled){
+                            outfile << "SoundEnabled=1\n";
+                        }else{
+                            outfile << "SoundEnabled=0\n";
+                        }
+                        outfile.close();
+                        */
+                    
 			UnhookWindowsHookEx;
 			UnhookWindowsHookEx;
 			//MessageBox(0, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!!!", 65536);//MsgBoxSetForeground
-                        MessageBox(0, "Р—Р°РєРѕРЅС‡РёР»Рё", "Р’СЃРµРіРѕ С…РѕСЂРѕС€РµРіРѕ!!!", 65536);//MsgBoxSetForeground
+                        MessageBox(0, "Закончили", "Всего хорошего!!!", 65536);//MsgBoxSetForeground
 			TrayMessage(hWnd, NIM_DELETE, 0, 0, 0);
 			exit(0);
 
@@ -814,9 +825,11 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 		///////////////
 	}
 
+        /* uncomment
 	printf("%d\n", wParam);
 	printf("MBUTTONDOWN %d\n", MBUTTONDOWN);
 	printf("RBUTTONDOWN %d\n", RBUTTONDOWN);
+        */
 	//printf("nCode %d\n", nCode);
 
 	return 0;
@@ -910,6 +923,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				TrayMessage(hWnd, NIM_MODIFY, 0, LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICON2)), "Half keyboard\n(пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)");
 
 			break;
+                case ID_MENU_Sound:
+                    SoundEnabled = !SoundEnabled;
+                    break;
 		case ID_MENU_Reference:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_REFERENCE), hWnd, Reference);
 			break;
@@ -917,9 +933,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUT), hWnd, Reference);
 			break;
 		case ID_MENU_EXIT:
+                    
+                        SaveCfgFile();
 			DestroyWindow(hWnd);
 			UnhookWindowsHookEx;
 			UnhookWindowsHookEx;
+         
+                        /*
+                        char buffer[MAX_PATH];
+                        GetModuleFileName(NULL, buffer, MAX_PATH);
+                        string::size_type pos = string(buffer).find_last_of("\\/");
+                        ConfigFilename = ""+ string(buffer).substr(0, pos) + "/half_kayboard.cfg";
+                    
+                        std::ofstream outfile (ConfigFilename);
+                        outfile << "my text here!" << std::endl;
+                        outfile.close();
+                        */
+                        
+
 			//MessageBox(0, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!!!", 65536);//MsgBoxSetForeground
                         MessageBox(0, "Закончили", "Всего хорошего!!!", 65536);//MsgBoxSetForeground
 			TrayMessage(hWnd, NIM_DELETE, 0, 0, 0);
@@ -935,6 +966,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	return 0;
 }
+
 
 //int main(int argc, TCHAR* argv[])
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -977,10 +1009,121 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	if (!hWnd)
 		return 1;
 
+        /*
+        const char config[] = 
+            "url=http://example.com\n"
+            "file=main.exe\n"
+            "true=0";
+*/
+        char buffer[MAX_PATH];
+        GetModuleFileName(NULL, buffer, MAX_PATH);
+        string::size_type pos = string(buffer).find_last_of("\\/");
+        
+        
+        ConfigFilename = ""+ string(buffer).substr(0, pos) + "/half_kayboard.cfg";
+        
+        // std::ifstream is RAII, i.e. no need to call close
+    std::ifstream cFile (ConfigFilename);
+    if (cFile.is_open())
+    {
+        std::string line;
+        while(getline(cFile, line)){
+            /*
+            line.erase(std::remove_if(line.begin(), line.end(), isspace),
+                                 line.end());
+            */
+            if(line[0] == '#' || line.empty())
+                continue;
+            auto delimiterPos = line.find("=");
+            string name = line.substr(0, delimiterPos);
+            string value = line.substr(delimiterPos + 1);
+            
+            if (name.find("CaptureEnabled") != std::string::npos){
+                if (value.find("1") != std::string::npos){
+                    CaptureEnabled = true;
+                }else{
+                    CaptureEnabled = false;    
+                }  
+            }              
+            if (name.find("SoundEnabled") != std::string::npos){
+                if (value.find("1") != std::string::npos){
+                    SoundEnabled = true;
+                }else{
+                    SoundEnabled = false;    
+                }
+            }
+            std::cout << name << " " << value << '\n';
+            printf("%s", line);
+        }
+        
+    }
+  /*      
+std::string str;
+const char * c = str.c_str();
+*/
+
+        //config.txt
+//Input name = image1.png
+//Num. of rows = 100
+//Num. of cols = 150
+
+        /*
+        ifstream input( ConfigFilename);
+        
+        for( string line; getline( input, line ); ){
+    
+            char cline[] = line.c_str();
+        std::istringstream is_line(cline);
+        std::string key;
+        if (std::getline(is_line, key, '=')) {
+            std::string value;
+            if (std::getline(is_line, value)){
+                int i = 6;
+            }
+                //store_line(key, value);
+        }
+    }
+        */
+        
+        
+        /*
+        std::ifstream file(ConfigFilename);
+        file.open();
+    if (file.is_open()) {
+        string line;
+        while (getline(file, line)) {
+            // using printf() in all tests for consistency
+            printf("%s", line);
+        }
+        file.close();
+    }
+        */
+        /*
+    istringstream is_file(config);
+
+    std::string line;
+    while (std::getline(is_file, line)) {
+        std::istringstream is_line(line);
+        std::string key;
+        if (std::getline(is_line, key, '=')) {
+            std::string value;
+            if (std::getline(is_line, value)){
+                int i = 6;
+            }
+                //store_line(key, value);
+        }
+    }
+    */
+    
 	//ShowWindow(hWnd, nCmdShow);
 	ShowWindow(hWnd, SW_HIDE);
         ShowWindow(GetConsoleWindow(), SW_HIDE);
-	TrayMessage(hWnd, NIM_ADD, 0, LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICON1)), "Half keyboard\n(Захват включен)");
+	//TrayMessage(hWnd, NIM_ADD, 0, LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICON1)), "Half keyboard\n(Захват включен)");
+        if (CaptureEnabled)
+	    TrayMessage(hWnd, NIM_ADD, 0, LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICON1)), "Half keyboard\n(Захват включен)");
+	else  
+            TrayMessage(hWnd, NIM_ADD, 0, LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICON2)), "Half keyboard\n(Захват выключен)");
+
 	//TrayMessage(hWnd, NIM_ADD, 0, LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON2)), "Half keyboard\n(?????? ????????)");	
 
         //PlaySound(MAKEINTRESOURCE(IDI_WAV52), GetModuleHandle(NULL), SND_RESOURCE);

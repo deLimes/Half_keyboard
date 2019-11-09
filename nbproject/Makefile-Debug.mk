@@ -52,11 +52,13 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=
+LDLIBSOPTIONS=/C/Windows/SysWOW64/winmm.dll
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/half_keyboard.exe
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/half_keyboard.exe: /C/Windows/SysWOW64/winmm.dll
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/half_keyboard.exe: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
@@ -73,6 +75,8 @@ ${OBJECTDIR}/main.o: main.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
+	${RM} -r ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/winmm.dll
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/half_keyboard.exe
 
 # Subprojects
 .clean-subprojects:
