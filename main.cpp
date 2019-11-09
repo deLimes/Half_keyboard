@@ -941,7 +941,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 {
 	MSG messages;
 
-	if (isProcessRun("HalfKeyboard.exe"))
+	if (isProcessRun("half_keyboard.exe"))
 	{
 		//MessageBox(0, "HalfKeyboard.exe пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ!", 0);
                 MessageBox(0, "HalfKeyboard.exe уже ЗАПУЩЕН", "Повторный запуск!", 0);
